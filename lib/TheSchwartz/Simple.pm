@@ -50,6 +50,8 @@ sub insert {
 
         return $jobid if defined $jobid;
     }
+
+    return;
 }
 
 sub funcname_to_id {
