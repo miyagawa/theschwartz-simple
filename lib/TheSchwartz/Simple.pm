@@ -109,7 +109,7 @@ __END__
 
 =encoding utf-8
 
-=for stopwords TheSchwartz DBI
+=for stopwords TheSchwartz DBI schwartz
 
 =head1 NAME
 
