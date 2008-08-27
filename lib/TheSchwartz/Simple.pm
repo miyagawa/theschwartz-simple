@@ -30,6 +30,10 @@ sub insert {
     }
     $job->arg( Storable::nfreeze($job->arg) ) if ref $job->arg;
 
+    # Use default value if 'run_after' or 'grabbed_until' is not specified
+    $job->run_after( time ) unless $job->run_after;
+    $job->grabbed_until( 0 ) unless $job->grabbed_until;
+
     for my $dbh (@{$self->{databases}}) {
         my $jobid;
         eval {
