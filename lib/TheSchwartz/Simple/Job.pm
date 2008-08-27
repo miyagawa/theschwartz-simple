@@ -3,16 +3,21 @@ use strict;
 
 sub new_from_array {
     my($class, $funcname, $arg) = @_;
-    bless {
+    $class->new(
         funcname => $funcname,
         arg      => $arg,
-    }, $class;
+    );
 }
 
 sub new {
     my $class = shift;
     my %param = ref $_[0] ? %{$_[0]} : @_;
-    bless \%param, $class;
+    my $self = bless \%param, $class;
+
+    $self->run_after( time ) unless defined $self->run_after;
+    $self->grabbed_until( 0) unless defined $self->grabbed_until;
+
+    $self;
 }
 
 sub _accessor {
