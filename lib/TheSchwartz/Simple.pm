@@ -146,6 +146,10 @@ TheSchwartz::Worker module,
 
 Tatsuhiko Miyagawa E<lt>miyagawa@cpan.orgE<gt>
 
+=head1 COPYRIGHT
+
+Six Apart, Ltd. 2008-
+
 =head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
