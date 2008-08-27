@@ -18,7 +18,7 @@ use TheSchwartz;
 my $dbname = shift @ARGV or die "dbname required";
 
 my $client = TheSchwartz->new(databases => [ { dsn => "dbi:mysql:$dbname", user => 'root' } ]);
-$client->set_prioritize;
+$client->set_prioritize(1);
 $client->can_do('MyWorker');
 $client->work_once;
 
