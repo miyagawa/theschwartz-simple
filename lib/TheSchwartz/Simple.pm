@@ -124,7 +124,7 @@ TheSchwartz::Simple - Lightweight TheSchwartz job dispatcher using plain DBI
   my $client = TheSchwartz::Simple->new([ $dbh ]);
   my $job_id = $client->insert('funcname', $arg);
 
-  my $job = TheSchwartz::Simple->new;
+  my $job = TheSchwartz::Simple::Job->new;
   $job->funcname("WorkerName");
   $job->arg({ foo => "bar" });
   $job->uniqkey("uniqkey");
