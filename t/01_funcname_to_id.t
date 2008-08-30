@@ -3,15 +3,20 @@ use warnings;
 use t::Utils;
 use TheSchwartz::Simple;
 
-plan tests => 5;
+plan tests => 6;
 
 run_test {
-    my $dbh = shift;
-    my $sch = TheSchwartz::Simple->new($dbh);
-    isa_ok $sch, 'TheSchwartz::Simple';
-    is $sch->funcname_to_id($dbh, 'foo'), 1;
-    is $sch->funcname_to_id($dbh, 'bar'), 2;
-    is $sch->funcname_to_id($dbh, 'foo'), 1;
-    is $sch->funcname_to_id($dbh, 'baz'), 3;
+    my $dbh1 = shift;
+    run_test {
+        my $dbh2 = shift;
+
+        my $sch = TheSchwartz::Simple->new([$dbh1, $dbh2]);
+        isa_ok $sch, 'TheSchwartz::Simple';
+        is $sch->funcname_to_id($dbh1, 'foo'), 1;
+        is $sch->funcname_to_id($dbh1, 'bar'), 2;
+        is $sch->funcname_to_id($dbh1, 'foo'), 1;
+        is $sch->funcname_to_id($dbh1, 'baz'), 3;
+        is $sch->funcname_to_id($dbh2, 'bar'), 1, 'other dbh';
+    };
 };
 
