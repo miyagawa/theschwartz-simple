@@ -28,7 +28,7 @@ run_test {
     is $row->{arg},      'http://wassr.jp/';
     is $row->{priority}, undef;
 
-    my $row = $sth->fetchrow_hashref;
+    $row = $sth->fetchrow_hashref;
     ok $row;
     is $row->{jobid},    2;
     is $row->{funcid},   $sch->funcname_to_id( $dbh, 'fetch' );
