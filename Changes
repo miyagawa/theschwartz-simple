@@ -1,4 +1,8 @@
 Revision history for Perl extension TheSchwartz::Simple
 
+0.02  Fri Aug 29 18:47:03 PDT 2008
+        - No functional changes
+        - Added unit tests thanks to Tokuhiro Matsuno. 
+
 0.01  Wed Aug 27 01:29:13 2008
         - original version
