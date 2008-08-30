@@ -24,3 +24,5 @@ MANIFEST			This list of files
 META.yml
 README
 t/00_compile.t
+t/01_funcname_to_id.t
+t/Utils.pm
