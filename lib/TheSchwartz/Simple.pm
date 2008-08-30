@@ -12,7 +12,7 @@ use TheSchwartz::Simple::Job;
 sub new {
     my $class = shift;
     my($dbhs) = @_;
-    $dbhs = [ $dbhs ] unless ref $dbhs;
+    $dbhs = [ $dbhs ] unless ref $dbhs eq 'ARRAYREF';
     bless {
         databases => $dbhs,
         _funcmap  => {},
