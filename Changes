@@ -1,5 +1,9 @@
 Revision history for Perl extension TheSchwartz::Simple
 
+0.03  Tue Sep  2 01:51:53 PDT 2008
+        - Added list_jobs method
+          (Thanks to hide-k)
+
 0.02  Fri Aug 29 18:47:03 PDT 2008
         - No functional changes
         - Added unit tests thanks to Tokuhiro Matsuno. 

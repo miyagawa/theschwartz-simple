@@ -25,4 +25,6 @@ META.yml
 README
 t/00_compile.t
 t/01_funcname_to_id.t
+t/02_insert.t
+t/03_list_jobs.t
 t/Utils.pm
