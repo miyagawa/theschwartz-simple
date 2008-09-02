@@ -11,8 +11,8 @@ use TheSchwartz::Simple::Job;
 
 sub new {
     my $class = shift;
-    my($dbhs) = @_;
-    $dbhs = [ $dbhs ] unless ref $dbhs eq 'ARRAYREF';
+    my ($dbhs) = @_;
+    $dbhs = [$dbhs] unless ref $dbhs eq 'ARRAYREF';
     bless {
         databases => $dbhs,
         _funcmap  => {},
@@ -23,29 +23,30 @@ sub insert {
     my $self = shift;
 
     my $job;
-    if (ref $_[0] eq 'TheSchwartz::Simple::Job') {
+    if ( ref $_[0] eq 'TheSchwartz::Simple::Job' ) {
         $job = $_[0];
-    } else {
+    }
+    else {
         $job = TheSchwartz::Simple::Job->new_from_array(@_);
     }
-    $job->arg( Storable::nfreeze($job->arg) ) if ref $job->arg;
+    $job->arg( Storable::nfreeze( $job->arg ) ) if ref $job->arg;
 
-    for my $dbh (@{$self->{databases}}) {
+    for my $dbh ( @{ $self->{databases} } ) {
         my $jobid;
         eval {
-            $job->funcid( $self->funcname_to_id($dbh, $job->funcname) );
-            $job->insert_time( time );
+            $job->funcid( $self->funcname_to_id( $dbh, $job->funcname ) );
+            $job->insert_time(time);
 
             my $row = $job->as_hashref;
             my @col = keys %$row;
 
             my $sql = sprintf 'INSERT INTO job (%s) VALUES (%s)',
-                join(", ", @col), join(", ", ("?") x @col);
+                join( ", ", @col ), join( ", ", ("?") x @col );
 
             my $sth = $dbh->prepare_cached($sql);
             $sth->execute( @$row{@col} );
 
-            $jobid = _insert_id($dbh, $sth, "job", "jobid");
+            $jobid = _insert_id( $dbh, $sth, "job", "jobid" );
         };
 
         return $jobid if defined $jobid;
@@ -55,32 +56,35 @@ sub insert {
 }
 
 sub funcname_to_id {
-    my($self, $dbh, $funcname) = @_;
+    my ( $self, $dbh, $funcname ) = @_;
 
     my $dbid = refaddr $dbh;
-    unless (exists $self->{_funcmap}{$dbid}) {
-        my $sth = $dbh->prepare_cached('SELECT funcid, funcname FROM funcmap');
+    unless ( exists $self->{_funcmap}{$dbid} ) {
+        my $sth
+            = $dbh->prepare_cached('SELECT funcid, funcname FROM funcmap');
         $sth->execute;
-        while (my $row = $sth->fetchrow_arrayref) {
-            $self->{_funcmap}{$dbid}{$row->[1]} = $row->[0];
+        while ( my $row = $sth->fetchrow_arrayref ) {
+            $self->{_funcmap}{$dbid}{ $row->[1] } = $row->[0];
         }
         $sth->finish;
     }
 
-    unless (exists $self->{_funcmap}{$dbid}{$funcname}) {
+    unless ( exists $self->{_funcmap}{$dbid}{$funcname} ) {
         ## This might fail in a race condition since funcname is UNIQUE
-        my $sth = $dbh->prepare_cached('INSERT INTO funcmap (funcname) VALUES (?)');
+        my $sth = $dbh->prepare_cached(
+            'INSERT INTO funcmap (funcname) VALUES (?)');
         eval { $sth->execute($funcname) };
 
-        my $id = _insert_id($dbh, $sth, "funcmap", "funcid");
+        my $id = _insert_id( $dbh, $sth, "funcmap", "funcid" );
 
         ## If we got an exception, try to load the record again
         if ($@) {
-            my $sth = $dbh->prepare_cached('SELECT funcid FROM funcmap WHERE funcname = ?');
+            my $sth = $dbh->prepare_cached(
+                'SELECT funcid FROM funcmap WHERE funcname = ?');
             $sth->execute($funcname);
             $id = $sth->fetchrow_arrayref->[0]
                 or croak "Can't find or create funcname $funcname: $@";
-        };
+        }
 
         $self->{_funcmap}{$dbid}{$funcname} = $id;
     }
@@ -89,19 +93,76 @@ sub funcname_to_id {
 }
 
 sub _insert_id {
-    my($dbh, $sth, $table, $col) = @_;
+    my ( $dbh, $sth, $table, $col ) = @_;
 
     my $driver = $dbh->{Driver}{Name};
-    if ($driver eq 'mysql') {
+    if ( $driver eq 'mysql' ) {
         return $dbh->{mysql_insertid};
-    } elsif ($driver eq 'Pg') {
-        return $dbh->last_insert_id(undef, undef, undef, undef,
-                                    { sequence => join("_", $table, $col, 'seq') });
-    } elsif ($driver eq 'SQLite') {
+    }
+    elsif ( $driver eq 'Pg' ) {
+        return $dbh->last_insert_id( undef, undef, undef, undef,
+            { sequence => join( "_", $table, $col, 'seq' ) } );
+    }
+    elsif ( $driver eq 'SQLite' ) {
         return $dbh->func('last_insert_rowid');
-    } else {
+    }
+    else {
         croak "Don't know how to get last insert id for $driver";
     }
+}
+
+sub list_jobs {
+    my ( $self, $arg ) = @_;
+
+    die "No funcname" unless exists $arg->{funcname};
+
+    my @options;
+    push @options,
+        {
+        key   => 'run_after',
+        op    => '<=',
+        value => $arg->{run_after}
+        }
+        if exists $arg->{run_after};
+    push @options,
+        {
+        key   => 'grabbed_until',
+        op    => '<=',
+        value => $arg->{grabbed_until}
+        }
+        if exists $arg->{grabbed_until};
+
+    if ( $arg->{coalesce} ) {
+        $arg->{coalesce_op} ||= '=';
+        push @options,
+            {
+            key   => 'coalesce',
+            op    => $arg->{coalesce_op},
+            value => $arg->{coalesce}
+            };
+    }
+
+    my @jobs;
+    for my $dbh ( @{ $self->{databases} } ) {
+        eval {
+            my $funcid = $self->funcname_to_id( $dbh, $arg->{funcname} );
+
+            my $sql   = 'SELECT * FROM job WHERE funcid = ?';
+            my @value = ($funcid);
+            for (@options) {
+                $sql .= " AND $_->{key} $_->{op} ?";
+                push @value, $_->{value};
+            }
+
+            my $sth = $dbh->prepare_cached($sql);
+            $sth->execute(@value);
+            while ( my $ref = $sth->fetchrow_hashref ) {
+                push @jobs, TheSchwartz::Simple::Job->new($ref);
+            }
+        };
+    }
+
+    return @jobs;
 }
 
 1;
