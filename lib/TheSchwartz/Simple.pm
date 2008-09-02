@@ -187,6 +187,11 @@ TheSchwartz::Simple - Lightweight TheSchwartz job dispatcher using plain DBI
   $job->run_after( time + 60 );
   $client->insert($job);
 
+  my @jobs = $client->list_jobs({ funcname => 'funcname' });
+  for my $job (@jobs) {
+      print $job->jobid;
+  }
+
 =head1 DESCRIPTION
 
 TheSchwartz::Simple is yet another interface to insert a new job into
