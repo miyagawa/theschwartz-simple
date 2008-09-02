@@ -117,29 +117,24 @@ sub list_jobs {
     die "No funcname" unless exists $arg->{funcname};
 
     my @options;
-    push @options,
-        {
+    push @options, {
         key   => 'run_after',
         op    => '<=',
         value => $arg->{run_after}
-        }
-        if exists $arg->{run_after};
-    push @options,
-        {
+    } if exists $arg->{run_after};
+    push @options, {
         key   => 'grabbed_until',
         op    => '<=',
         value => $arg->{grabbed_until}
-        }
-        if exists $arg->{grabbed_until};
+    } if exists $arg->{grabbed_until};
 
     if ( $arg->{coalesce} ) {
         $arg->{coalesce_op} ||= '=';
-        push @options,
-            {
+        push @options, {
             key   => 'coalesce',
             op    => $arg->{coalesce_op},
             value => $arg->{coalesce}
-            };
+        };
     }
 
     my @jobs;
