@@ -1,5 +1,8 @@
 Revision history for Perl extension TheSchwartz::Simple
 
+0.04  Sat Sep  6 10:25:09 JST 2008
+        - Fixed a bug when new() is given an array ref of DBHs
+
 0.03  Tue Sep  2 01:51:53 PDT 2008
         - Added list_jobs method
           (Thanks to hide-k)
