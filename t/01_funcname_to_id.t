@@ -3,7 +3,7 @@ use warnings;
 use t::Utils;
 use TheSchwartz::Simple;
 
-plan tests => 6;
+plan tests => 7;
 
 run_test {
     my $dbh1 = shift;
@@ -17,6 +17,8 @@ run_test {
         is $sch->funcname_to_id($dbh1, 'foo'), 1;
         is $sch->funcname_to_id($dbh1, 'baz'), 3;
         is $sch->funcname_to_id($dbh2, 'bar'), 1, 'other dbh';
+
+        my $job_id = $sch->insert('foo', { bar => 1 });
+        ok $job_id;
     };
 };
-
