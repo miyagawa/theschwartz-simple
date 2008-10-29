@@ -44,7 +44,15 @@ sub insert {
                 join( ", ", @col ), join( ", ", ("?") x @col );
 
             my $sth = $dbh->prepare_cached($sql);
-            $sth->execute( @$row{@col} );
+            my $i = 1;
+            for my $col (@col) {
+                $sth->bind_param(
+                    $i++,
+                    $row->{$col},
+                    _bind_param_attr( $dbh, $col ),
+                );
+            }
+            $sth->execute();
 
             $jobid = _insert_id( $dbh, $sth, "job", "jobid" );
         };
@@ -158,6 +166,21 @@ sub list_jobs {
     }
 
     return @jobs;
+}
+
+sub _bind_param_attr {
+    my ( $dbh, $col ) = @_;
+
+    return if $col ne 'arg';
+
+    my $driver = $dbh->{Driver}{Name};
+    if ( $driver eq 'Pg' ) {
+        return { pg_type => DBD::Pg::PG_BYTEA() };
+    }
+    elsif ( $driver eq 'SQLite' ) {
+        return DBI::SQL_BLOB();
+    }
+    return;
 }
 
 1;
