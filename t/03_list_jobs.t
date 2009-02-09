@@ -2,11 +2,14 @@ use strict;
 use warnings;
 use t::Utils;
 use TheSchwartz::Simple;
-plan tests => 10;
+plan tests => 20;
+
+foreach $::prefix ("", "someprefix") {
 
 run_test {
     my $dbh = shift;
     my $sch = TheSchwartz::Simple->new($dbh);
+    $sch->prefix($::prefix) if $::prefix;
 
     $sch->insert('fetch', 'http://wassr.jp/');
     $sch->insert(
@@ -33,3 +36,5 @@ run_test {
     is $row->arg,      'http://pathtraq.com/';
     is $row->priority, 3;
 };
+
+}

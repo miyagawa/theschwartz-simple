@@ -3,11 +3,14 @@ use warnings;
 use t::Utils;
 use TheSchwartz::Simple;
 
-plan tests => 15;
+plan tests => 30;
+
+foreach $::prefix ("", "someprefix") {
 
 run_test {
     my $dbh = shift;
     my $sch = TheSchwartz::Simple->new($dbh);
+    $sch->prefix($::prefix) if $::prefix;
     my @jobid;
 
     push @jobid, $sch->insert('fetch', 'http://wassr.jp/');
@@ -20,7 +23,7 @@ run_test {
     );
     push @jobid, $sch->insert('fetch', { url => 'http://example.com' });
 
-    my $sth = $dbh->prepare('SELECT jobid, funcid, arg, priority FROM job WHERE jobid IN (?, ?, ?) ORDER BY jobid ASC');
+    my $sth = $dbh->prepare("SELECT jobid, funcid, arg, priority FROM ${main::prefix}job WHERE jobid IN (?, ?, ?) ORDER BY jobid ASC");
     $sth->execute(@jobid);
 
     my $row = $sth->fetchrow_hashref;
@@ -45,3 +48,4 @@ run_test {
     is_deeply Storable::thaw($row->{arg}), { url => 'http://example.com' };
 };
 
+}

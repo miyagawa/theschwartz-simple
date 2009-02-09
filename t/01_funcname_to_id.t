@@ -3,7 +3,9 @@ use warnings;
 use t::Utils;
 use TheSchwartz::Simple;
 
-plan tests => 7;
+plan tests => 14;
+
+foreach $::prefix ("", "someprefix") {
 
 run_test {
     my $dbh1 = shift;
@@ -11,6 +13,7 @@ run_test {
         my $dbh2 = shift;
 
         my $sch = TheSchwartz::Simple->new([$dbh1, $dbh2]);
+        $sch->prefix($::prefix) if $::prefix;
         isa_ok $sch, 'TheSchwartz::Simple';
         is $sch->funcname_to_id($dbh1, 'foo'), 1;
         is $sch->funcname_to_id($dbh1, 'bar'), 2;
@@ -22,3 +25,5 @@ run_test {
         ok $job_id;
     };
 };
+
+}
