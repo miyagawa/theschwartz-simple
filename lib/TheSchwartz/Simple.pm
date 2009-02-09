@@ -2,7 +2,7 @@ package TheSchwartz::Simple;
 
 use strict;
 use 5.8.1;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 use Scalar::Util qw( refaddr );

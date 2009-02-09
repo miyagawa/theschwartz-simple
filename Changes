@@ -1,5 +1,8 @@
 Revision history for Perl extension TheSchwartz::Simple
 
+0.05  Sun Feb  8 23:48:18 PST 2009
+        - Support prefix (Thanks to Mark Fowler)
+
 0.04  Sat Sep  6 10:25:09 JST 2008
         - Fixed a bug when new() is given an array ref of DBHs
 
